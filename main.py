@@ -26,9 +26,17 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH/2
         self.rect.bottom = HEIGHT - 10  #sepration between bottom and ship
-
+        self.speed_x = 0
+        self.speed = 8
+    def movement(self):
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_RIGHT]:
+            self.speed_x = self.speed
+        if keystate[pygame.K_LEFT]:
+            self.speed_x = -self.speed
+        self.rect.x += self.speed_x
     def update(self):
-        pass
+        self.movement()
 
 
 #Game Functions

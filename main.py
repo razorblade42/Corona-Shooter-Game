@@ -28,10 +28,16 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 10  #sepration between bottom and ship
         self.speed_x = 0
         self.speed = 8
+        self.last_bullet_shot = pygame.time.get_ticks()
     def shoot_bullet(self):
-        b = Bullet(self.rect.centerx,self.rect.top)
-        all_bullets.add(b)
-        all_sprites.add(b)
+        current_time  = pygame.time.get_ticks()
+        if current_time - self.last_bullet_shot > 100:
+            self.last_bullet_shot = current_time
+            b = Bullet(self.rect.centerx, self.rect.top)
+            all_bullets.add(b)
+            all_sprites.add(b)
+
+
     def boundary(self):
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -45,6 +51,8 @@ class Player(pygame.sprite.Sprite):
         if keystate[pygame.K_LEFT]:
             self.speed_x = -self.speed
         self.rect.x += self.speed_x
+        if keystate[pygame.K_SPACE]:
+            self.shoot_bullet()
     def update(self):
         self.movement()
         self.boundary()
@@ -84,8 +92,13 @@ class Bullet(pygame.sprite.Sprite):
         self.speed_y = -10
     def update(self):
         self.rect.y += self.speed_y
+        if self.rect.bottom < 0:
+            self.kill()
 #Game Functions
-
+def span_new_corona():
+    m = Corona()
+    all_corona.add(m)
+    all_sprites.add(m)
 
 #Game sprites
 all_sprites = pygame.sprite.Group()
@@ -95,9 +108,7 @@ player = Player()
 all_sprites.add(player)
 
 for i in range(9):
-    m = Corona()
-    all_corona.add(m)
-    all_sprites.add(m)
+   span_new_corona()
 #Main Game
 running = True
 while running:
@@ -107,16 +118,20 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.shoot_bullet()
+
     #Update (for our sprites)
     all_sprites.update()
 
-    #checking collisions
+    #checking ship collisions
     corona_collision = pygame.sprite.spritecollide(player,all_corona,False)
     if corona_collision:
         running = False
+
+    #checking bullet collision
+    bullet_collision = pygame.sprite.groupcollide(all_corona,all_bullets,True,True)
+    for collision in  bullet_collision:
+        span_new_corona()
+
     #Draw/Render
     screen.fill(BLACK)
     all_sprites.draw(screen)

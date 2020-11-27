@@ -6,7 +6,7 @@ BLACK = (0,0,0)
 RED = (255,0,0)
 GREEN = (0,255,0)
 BLUE = (0,0,0)
-
+YELLOW = (123,34,124)
 #settings:
 pygame.init()
 pygame.mixer.init()
@@ -28,7 +28,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 10  #sepration between bottom and ship
         self.speed_x = 0
         self.speed = 8
-
+    def shoot_bullet(self):
+        b = Bullet(self.rect.centerx,self.rect.top)
+        all_bullets.add(b)
+        all_sprites.add(b)
     def boundary(self):
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -68,12 +71,26 @@ class Corona(pygame.sprite.Sprite):
         self.rect.y += self.speed_y
         self.rect.x += self.speed_x
         self.boundary()
+
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10,20))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed_y = -10
+    def update(self):
+        self.rect.y += self.speed_y
 #Game Functions
 
 
 #Game sprites
 all_sprites = pygame.sprite.Group()
 all_corona = pygame.sprite.Group()
+all_bullets = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
@@ -90,9 +107,16 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot_bullet()
     #Update (for our sprites)
     all_sprites.update()
+
+    #checking collisions
+    corona_collision = pygame.sprite.spritecollide(player,all_corona,False)
+    if corona_collision:
+        running = False
     #Draw/Render
     screen.fill(BLACK)
     all_sprites.draw(screen)

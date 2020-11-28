@@ -11,7 +11,7 @@ YELLOW = (123,34,124)
 pygame.init()
 pygame.mixer.init()
 WIDTH = 600
-HEIGHT = 800
+HEIGHT = 600
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Shoot-Karona!")
 clock = pygame.time.Clock()
@@ -61,7 +61,7 @@ class Player(pygame.sprite.Sprite):
 class Corona(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((30,30))
+        self.image = pygame.Surface((10,30))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(0,WIDTH-self.rect.width)
@@ -81,7 +81,13 @@ class Corona(pygame.sprite.Sprite):
         self.rect.x += self.speed_x
         self.boundary()
 
-
+class doctors(Corona) :
+    def spawn_new_corona(self):
+        self.image.fill(GREEN)
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-150, -100)
+        self.speed_y = random.randrange(2, 4)
+        self.speed_x = random.randrange(-3, 3)
 class Bullet(pygame.sprite.Sprite):
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
@@ -100,7 +106,10 @@ def spawn_new_corona():
     m = Corona()
     all_corona.add(m)
     all_sprites.add(m)
-
+def spawn_new_doctor():
+    m = doctors()
+    all_doctors.add(m)
+    all_sprites.add(m)
 def get_image(filename):
     img = pygame.image.load(path.join(img_folder,filename)).convert()
     return img
@@ -108,17 +117,19 @@ def get_image(filename):
 #images
 background = get_image("background.png")
 background_rect = background.get_rect()
-player_img =
 #player_img = get_image("playerShip.png")
 #Game sprites
 all_sprites = pygame.sprite.Group()
 all_corona = pygame.sprite.Group()
 all_bullets = pygame.sprite.Group()
+all_doctors=pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
-for i in range(9):
+for i in range(5):
    spawn_new_corona()
+for j in range(2):
+   spawn_new_doctor()
 #Main Game
 running = True
 while running:
@@ -136,7 +147,8 @@ while running:
     corona_collision = pygame.sprite.spritecollide(player,all_corona,False)
     if corona_collision:
         running = False
-
+    if pygame.sprite.groupcollide(all_bullets,all_doctors,False,False):
+        running =False
     #checking bullet collision
     bullet_collision = pygame.sprite.groupcollide(all_corona,all_bullets,True,True)
     for collision in  bullet_collision:

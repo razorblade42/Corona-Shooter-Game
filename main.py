@@ -1,6 +1,6 @@
 import pygame
 import random
-
+from os import path
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 RED = (255,0,0)
@@ -16,7 +16,8 @@ screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Shoot-Karona!")
 clock = pygame.time.Clock()
 FPS = 60
-
+game_folder = path.dirname(__file__)
+img_folder = path.join(game_folder,"img")
 #Game Classes
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -95,11 +96,20 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 #Game Functions
-def span_new_corona():
+def spawn_new_corona():
     m = Corona()
     all_corona.add(m)
     all_sprites.add(m)
 
+def get_image(filename):
+    img = pygame.image.load(path.join(img_folder,filename)).convert()
+    return img
+
+#images
+background = get_image("background.png")
+background_rect = background.get_rect()
+player_img =
+#player_img = get_image("playerShip.png")
 #Game sprites
 all_sprites = pygame.sprite.Group()
 all_corona = pygame.sprite.Group()
@@ -108,7 +118,7 @@ player = Player()
 all_sprites.add(player)
 
 for i in range(9):
-   span_new_corona()
+   spawn_new_corona()
 #Main Game
 running = True
 while running:
@@ -130,10 +140,10 @@ while running:
     #checking bullet collision
     bullet_collision = pygame.sprite.groupcollide(all_corona,all_bullets,True,True)
     for collision in  bullet_collision:
-        span_new_corona()
+        spawn_new_corona()
 
     #Draw/Render
-    screen.fill(BLACK)
+    screen.blit(background,background_rect)
     all_sprites.draw(screen)
     #Update the display
     pygame.display.update()
